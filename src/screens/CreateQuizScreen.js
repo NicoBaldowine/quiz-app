@@ -22,28 +22,36 @@ const CreateQuizScreen = () => {
 
     try {
       const response = await axios.post(
-        'https://api.openai.com/v1/completions',
+        'https://api.openai.com/v1/chat/completions',
         {
-          model: 'text-davinci-003',
-          prompt: `Generate 10 quiz questions about ${topic}, each with 4 answer choices, and identify the correct answer.`,
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a quiz generator.`,
+            },
+            {
+              role: 'user',
+              content: `Generate 10 quiz questions about ${topic}, each with 4 answer choices, and identify the correct answer.`,
+            },
+          ],
           max_tokens: 500,
           temperature: 0.5,
         },
         {
           headers: {
-            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+            Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
             'Content-Type': 'application/json',
           },
         }
       );
       console.log('Quiz generated successfully', response.data);
-      const generatedText = response.data.choices[0].text;
+      const generatedText = response.data.choices[0].message.content;
       const questionsArray = generatedText.split('\n').filter((q) => q.trim() !== '');
       setQuizQuestions(questionsArray);
     } catch (error) {
       console.error('Error generating quiz:', error.response ? error.response.data : error.message);
       if (error.response) {
-        // Log detailed error response
         console.log('Status:', error.response.status);
         console.log('Data:', error.response.data);
       }
