@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const CreateQuizScreen = () => {
-  // States for quiz title, topic, and generated questions
   const [title, setTitle] = useState('');
   const [topic, setTopic] = useState('');
   const [quizQuestions, setQuizQuestions] = useState([]);
-  const [loading, setLoading] = useState(false); // To handle loading state
-  const [error, setError] = useState(null); // To handle error state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Function to create quiz by calling OpenAI API
   const createQuiz = async () => {
@@ -16,18 +15,17 @@ const CreateQuizScreen = () => {
       return;
     }
 
-    // Log API key and button click to ensure they're working
-    console.log('API Key:', process.env.REACT_APP_OPENAI_API_KEY);  // Check if API key is available
-    console.log('Creating quiz with topic:', topic, 'and title:', title);  // Check if the function is triggered
+    console.log('API Key:', process.env.REACT_APP_OPENAI_API_KEY);  
+    console.log('Creating quiz with topic:', topic, 'and title:', title);
 
     setLoading(true);
     setError(null);
 
     try {
       const response = await axios.post(
-        'https://api.openai.com/v1/completions',
+        'https://api.openai.com/v1/completions', // Correct API URL
         {
-          model: 'text-davinci-003', // OpenAI's text generation model
+          model: 'text-davinci-003',
           prompt: `Generate 10 quiz questions about ${topic}, each with 4 answer choices, and identify the correct answer.`,
           max_tokens: 500,
           n: 1,
@@ -36,13 +34,12 @@ const CreateQuizScreen = () => {
         },
         {
           headers: {
-            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,  // Check if API key is passed correctly
+            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
             'Content-Type': 'application/json',
           },
         }
       );
-      console.log('Quiz generated successfully', response.data); // Check success
-      // Process response
+      console.log('Quiz generated successfully', response.data);
       const generatedText = response.data.choices[0].text;
       const questionsArray = generatedText.split('\n').filter((q) => q.trim() !== '');
       setQuizQuestions(questionsArray);
@@ -59,7 +56,6 @@ const CreateQuizScreen = () => {
       <button onClick={() => window.history.back()}>Close</button>
       <h1>Create a Quiz</h1>
 
-      {/* Input fields for the quiz title and topic */}
       <input
         type="text"
         placeholder="Quiz Title"
@@ -73,15 +69,12 @@ const CreateQuizScreen = () => {
         onChange={(e) => setTopic(e.target.value)}
       />
 
-      {/* Button to create quiz */}
       <button onClick={createQuiz} disabled={loading}>
         {loading ? 'Generating Quiz...' : 'Create Quiz'}
       </button>
 
-      {/* Error message */}
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      {/* Display generated quiz questions */}
       {quizQuestions.length > 0 && (
         <div>
           <h2>Generated Quiz Questions</h2>
