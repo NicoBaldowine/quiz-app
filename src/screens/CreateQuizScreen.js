@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import QuizScreen from './QuizScreen'; // Import the new screen
 
 const CreateQuizScreen = () => {
   const [title, setTitle] = useState('');
   const [topic, setTopic] = useState('');
-  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [quizData, setQuizData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -13,9 +14,6 @@ const CreateQuizScreen = () => {
       alert('Please provide both title and topic.');
       return;
     }
-
-    console.log('API Key:', process.env.REACT_APP_OPENAI_API_KEY);
-    console.log('Creating quiz with topic:', topic, 'and title:', title);
 
     setLoading(true);
     setError(null);
@@ -28,15 +26,12 @@ const CreateQuizScreen = () => {
           messages: [
             {
               role: 'system',
-              content: `You are a quiz generator.`,
-            },
-            {
-              role: 'user',
-              content: `Generate 1 quiz question about ${topic}, with 4 answer choices and identify the correct answer.`,
+              content: `Generate a quiz question on the topic: ${topic}. Provide four answer choices and identify the correct one.`,
             },
           ],
-          max_tokens: 100, // Reduced token count for one question
-          temperature: 0.5,
+          max_tokens: 200,
+          n: 1,
+          temperature: 0.7,
         },
         {
           headers: {
@@ -45,16 +40,25 @@ const CreateQuizScreen = () => {
           },
         }
       );
-      console.log('Quiz generated successfully', response.data);
+
+      // Parse response
       const generatedText = response.data.choices[0].message.content;
-      const questionsArray = generatedText.split('\n').filter((q) => q.trim() !== '');
-      setQuizQuestions(questionsArray);
+      const lines = generatedText.split('\n').filter((line) => line.trim() !== '');
+
+      const question = lines[0].replace('Question: ', '');
+      const answers = [lines[1], lines[2], lines[3], lines[4]].map((line) =>
+        line.replace(/^[A-D]\)\s*/, '')
+      );
+      const correctAnswer = lines[5].replace('Correct answer: ', '');
+
+      // Set quiz data
+      setQuizData({
+        question,
+        answers,
+        correctAnswer,
+      });
     } catch (error) {
-      console.error('Error generating quiz:', error.response ? error.response.data : error.message);
-      if (error.response) {
-        console.log('Status:', error.response.status);
-        console.log('Data:', error.response.data);
-      }
+      console.error('Error generating quiz:', error);
       setError('Failed to generate quiz. Please try again.');
     } finally {
       setLoading(false);
@@ -66,34 +70,33 @@ const CreateQuizScreen = () => {
       <button onClick={() => window.history.back()}>Close</button>
       <h1>Create a Quiz</h1>
 
-      <input
-        type="text"
-        placeholder="Quiz Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Topic"
-        value={topic}
-        onChange={(e) => setTopic(e.target.value)}
-      />
+      {!quizData && (
+        <>
+          <input
+            type="text"
+            placeholder="Quiz Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Topic"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+          />
+          <button onClick={createQuiz} disabled={loading}>
+            {loading ? 'Generating Quiz...' : 'Create Quiz'}
+          </button>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+        </>
+      )}
 
-      <button onClick={createQuiz} disabled={loading}>
-        {loading ? 'Generating Quiz...' : 'Create Quiz'}
-      </button>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      {quizQuestions.length > 0 && (
-        <div>
-          <h2>Generated Quiz Question</h2>
-          <ul>
-            {quizQuestions.map((question, index) => (
-              <li key={index}>{question}</li>
-            ))}
-          </ul>
-        </div>
+      {quizData && (
+        <QuizScreen
+          question={quizData.question}
+          answers={quizData.answers}
+          correctAnswer={quizData.correctAnswer}
+        />
       )}
     </div>
   );
