@@ -32,7 +32,7 @@ const CreateQuizScreen = () => {
         },
         {
           headers: {
-            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`, // Use environment variable for security
+            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`, // Correct use of environment variable
             'Content-Type': 'application/json',
           },
         }
