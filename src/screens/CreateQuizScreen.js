@@ -8,14 +8,13 @@ const CreateQuizScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Function to create quiz by calling OpenAI API
   const createQuiz = async () => {
     if (!topic || !title) {
       alert('Please provide both title and topic.');
       return;
     }
 
-    console.log('API Key:', process.env.REACT_APP_OPENAI_API_KEY);  
+    console.log('API Key:', process.env.REACT_APP_OPENAI_API_KEY);
     console.log('Creating quiz with topic:', topic, 'and title:', title);
 
     setLoading(true);
@@ -23,13 +22,11 @@ const CreateQuizScreen = () => {
 
     try {
       const response = await axios.post(
-        'https://api.openai.com/v1/completions', // Correct API URL
+        'https://api.openai.com/v1/completions',
         {
           model: 'text-davinci-003',
           prompt: `Generate 10 quiz questions about ${topic}, each with 4 answer choices, and identify the correct answer.`,
           max_tokens: 500,
-          n: 1,
-          stop: null,
           temperature: 0.5,
         },
         {
@@ -45,6 +42,11 @@ const CreateQuizScreen = () => {
       setQuizQuestions(questionsArray);
     } catch (error) {
       console.error('Error generating quiz:', error.response ? error.response.data : error.message);
+      if (error.response) {
+        // Log detailed error response
+        console.log('Status:', error.response.status);
+        console.log('Data:', error.response.data);
+      }
       setError('Failed to generate quiz. Please try again.');
     } finally {
       setLoading(false);
