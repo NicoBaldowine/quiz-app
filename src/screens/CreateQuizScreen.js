@@ -45,7 +45,7 @@ const CreateQuizScreen = () => {
         .filter((q) => q.trim() !== ''); // Ensure non-empty questions
       setQuizQuestions(questionsArray);
     } catch (error) {
-      console.error('Error generating quiz:', error);
+      console.error('Error generating quiz:', error.response ? error.response.data : error.message); // Log the exact error to console
       setError('Failed to generate quiz. Please try again.');
     } finally {
       setLoading(false);
