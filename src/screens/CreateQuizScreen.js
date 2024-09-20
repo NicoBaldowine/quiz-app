@@ -32,10 +32,10 @@ const CreateQuizScreen = () => {
             },
             {
               role: 'user',
-              content: `Generate 10 quiz questions about ${topic}, each with 4 answer choices, and identify the correct answer.`,
+              content: `Generate 1 quiz question about ${topic}, with 4 answer choices and identify the correct answer.`,
             },
           ],
-          max_tokens: 500,
+          max_tokens: 100, // Reduced token count for one question
           temperature: 0.5,
         },
         {
@@ -87,7 +87,7 @@ const CreateQuizScreen = () => {
 
       {quizQuestions.length > 0 && (
         <div>
-          <h2>Generated Quiz Questions</h2>
+          <h2>Generated Quiz Question</h2>
           <ul>
             {quizQuestions.map((question, index) => (
               <li key={index}>{question}</li>
