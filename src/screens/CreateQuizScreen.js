@@ -16,6 +16,10 @@ const CreateQuizScreen = () => {
       return;
     }
 
+    // Log API key and button click to ensure they're working
+    console.log('API Key:', process.env.REACT_APP_OPENAI_API_KEY);  // Check if API key is available
+    console.log('Creating quiz with topic:', topic, 'and title:', title);  // Check if the function is triggered
+
     setLoading(true);
     setError(null);
 
@@ -32,20 +36,18 @@ const CreateQuizScreen = () => {
         },
         {
           headers: {
-            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`, // Correct use of environment variable
+            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,  // Check if API key is passed correctly
             'Content-Type': 'application/json',
           },
         }
       );
-
-      // Process the OpenAI response and set the quiz questions
+      console.log('Quiz generated successfully', response.data); // Check success
+      // Process response
       const generatedText = response.data.choices[0].text;
-      const questionsArray = generatedText
-        .split('\n')
-        .filter((q) => q.trim() !== ''); // Ensure non-empty questions
+      const questionsArray = generatedText.split('\n').filter((q) => q.trim() !== '');
       setQuizQuestions(questionsArray);
     } catch (error) {
-      console.error('Error generating quiz:', error.response ? error.response.data : error.message); // Log the exact error to console
+      console.error('Error generating quiz:', error.response ? error.response.data : error.message);
       setError('Failed to generate quiz. Please try again.');
     } finally {
       setLoading(false);
